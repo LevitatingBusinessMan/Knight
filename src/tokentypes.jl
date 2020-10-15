@@ -3,6 +3,9 @@
 	IDENTIFIER
 	STRING
 	NUMBER
+	TRUE
+	FALSE
+	NULL
 end
 
 #=

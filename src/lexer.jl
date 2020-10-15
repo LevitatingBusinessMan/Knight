@@ -34,7 +34,13 @@ module Lexer
 			#identifier
 			elseif occursin(r"[a-z]", string(current_char))
 				lexeme = consume(r"[a-z]")
-				push!(tokens, Token(IDENTIFIER, lexeme))
+
+				type = (lexeme == "true" ? TRUE
+					: lexeme == "false" ? FALSE
+					: lexeme == "null" ? NULL
+					: IDENTIFIER)
+
+				push!(tokens, Token(type, lexeme))
 
 			#numbers
 			# I'll add floats later
@@ -59,7 +65,6 @@ module Lexer
 			#unknown
 			elseif occursin(r"\s", string(current_char))
 				index += 1
-				continue
 			else
 				error("Unknown token '$(current_char)'")
 			end
@@ -88,7 +93,7 @@ module Lexer
 			next += 1
 		end
 		lexeme = source[index:next-1]
-		index = next
+		index = next+1
 		return lexeme
 	end
 

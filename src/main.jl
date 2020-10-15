@@ -1,7 +1,9 @@
 include("lexer.jl")
 include("logger.jl")
+include("parser.jl")
 
 using .Lexer
+using .Parser
 
 function repl()
 	while true
@@ -10,9 +12,11 @@ function repl()
 
 		try
 			tokens = lex(input)
-			println(tokens)
+			statements = Parser.parse(tokens)
+			println(statements)
 		catch err
 			Logger.error(err)
+			throw(err)
 		end
 	end
 end
