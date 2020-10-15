@@ -1,4 +1,5 @@
 include("lexer.jl")
+include("logger.jl")
 
 using .Lexer
 
@@ -6,17 +7,13 @@ function repl()
 	while true
 		print("(knight)> ")
 		input = readline(stdin)
-		tokens = lex(input)
 
-		println(tokens)
-
-		#= 		
 		try
-			lex(input)
+			tokens = lex(input)
+			println(tokens)
 		catch err
-			@error(err)
+			Logger.error(err)
 		end
-		=#
 	end
 end
 

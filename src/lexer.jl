@@ -10,18 +10,20 @@ module Lexer
 	#type declarations on global variables are not yet supported
 	index = 1
 	source = ""
+	line = 0
 
 	function lex(source_)
 
 		global index
 		global source
+		global line
 
 		line = 0
 		index = 1
 		source = source_
 		tokens = []
 	
-		while index < length(source)
+		while index <= length(source)
 			current_char = source[index]
 
 			#function_name
@@ -59,7 +61,7 @@ module Lexer
 				index += 1
 				continue
 			else
-				println("Unknown token")
+				error("Unknown token '$(current_char)'")
 			end
 		end
 
@@ -88,6 +90,15 @@ module Lexer
 		lexeme = source[index:next-1]
 		index = next
 		return lexeme
+	end
+
+	struct LexingError <: Exception
+		msg::String
+		line::Integer
+	end
+
+	function error(msg)
+		throw(LexingError(msg, line))
 	end
 
 	export lex
