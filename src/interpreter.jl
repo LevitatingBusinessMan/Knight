@@ -37,6 +37,8 @@ module Interpreter
 	#index = []
 	index = 1
 
+	repl_mode = false
+
 	native_functions = Dict(
 		"ECHO"=> str -> println(str),
 		"+"=> function(left,right)
@@ -79,18 +81,20 @@ module Interpreter
 			parameters = split(parameter_names, ",")
 			functions[name] = UserFunction(index+1, parameters)
 			skip(1)
-		end
+		end,
+		"EXIT"=> () -> exit()
 	)
 
 	tokens = []
 
-	function interpret(tokens_)
+	function interpret(tokens_, repl_mode_)
 		
 		global index
 		global tokens
 		tokens = vcat(tokens,tokens_)
 
-		println(tokens)
+		global repl_mode
+		repl_mode = repl_mode_
 
 		out = nothing
 		while index <= length(tokens)
@@ -109,6 +113,9 @@ module Interpreter
 			name = token.lexeme
 			(func, arity) = getFunc(name)
 			arguments = []
+
+			ensure_tokens(arity)
+
 			for i in 1:arity
 				index +=1
 				push!(arguments, evaluate(tokens[index]))
@@ -150,6 +157,7 @@ module Interpreter
 
 	function skip(n)
 		global index
+		ensure_tokens(n)
 		for i in 1:n
 			index += 1
 			if tokens[index].type == Main.Lexer.FUNCTION_NAME
@@ -173,6 +181,19 @@ module Interpreter
 		return (func, arity)
 	end
 
+	function ensure_tokens(needed)
+		global tokens, index
+		if needed > length(tokens) - index
+			if !repl_mode
+				throw("Missing function arguments")
+			end
+			tokens = vcat(tokens, Main.get_more_tokens(needed - (length(tokens) - index)))
+			ensure_tokens(needed)
+		end
+	end
+
 	export interpret
 
 end
+
+#FN "GREET" "name" ECHO + "Hello " name GREET "Levi"

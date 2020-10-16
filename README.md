@@ -11,3 +11,5 @@ It can parse the tokens from the scanner during runtime instead. So it is somewh
 It's almost like brainfuck in the sense that all statements form a tape, and control flow is handled simply by moving an instruction pointer.
 
 It can however be useful to parse the code for debugging purposes.
+
+[![asciicast](https://asciinema.org/a/zEFUTHG6pYRP3UW7zOvvj9rkV.svg)](https://asciinema.org/a/zEFUTHG6pYRP3UW7zOvvj9rkV)

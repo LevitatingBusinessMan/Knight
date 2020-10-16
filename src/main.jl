@@ -18,12 +18,18 @@ function repl()
 			tokens = lex(input)
 			#statements = Main.Parser.parse(tokens)
 			#print_tree(statements)
-			println(interpret(tokens))
+			println(interpret(tokens, true))
 		catch err
 			Logger.error(err)
 			throw(err)
 		end
 	end
+end
+
+function get_more_tokens(x)
+	print("\t$x> ")
+	input = readline(stdin)
+	return lex(input)
 end
 
 if length(ARGS) < 1
