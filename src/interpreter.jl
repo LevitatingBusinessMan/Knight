@@ -1,50 +1,88 @@
 module Interpreter
 
+	struct UserFunction
+		index
+		parameters
+	end
+
 	functions = Dict()
 	variables = Dict()
 
-	index = 0
+	#=
+	Note about scopes
+	New function for getting a var
+	Array of variable dictionaries get searched by it. (also function dict)
+	Push new dict when running function
+	Pop dict when leaving function
+	
+	Index will be an array of indeces
+	You run a function, you push the index you're on
+	You finish it, pop it
+
+	New GLOBAL= function
+	=#
+
+	#=
+	Note about arrays
+	
+	Create with function ARRAY
+	Edit with functions like PUSH
+
+	, function wil concat
+	, , "foo" "bar" ARRAY
+	will make "foo" "bar"
+
+	=#
+
+	#index = []
+	index = 1
 
 	native_functions = Dict(
 		"ECHO"=> str -> println(str),
-		"+"=> (left,right) -> left + right,
+		"+"=> function(left,right)
+			if (typeof(left) == Int && typeof(right) != Int || typeof(left) == String && typeof(right) != String)
+				throw("Can't add different types")
+			end
+			if (typeof(left) == String)
+				return string(left, right)
+			end
+			if (typeof(left) == Int)
+				return left + right
+			end
+			throw("You can only add strings or integers")
+		end,
 		"="=> function(name, value)
+			if !occursin(r"[a-z_]", name)
+				throw("Please use snake_case in variable names")
+			end
 			if typeof(name) != String
 				throw("Why are you trying to assign a value to a non-string name?")
 			end
 			variables[name] = value
 		end,
+		"!"=> value -> !value,
 		"EXIST"=> (name) -> haskey(variables, name),
 		"IF"=> function(value)
 			global index
 			if value != true
 				skip(1)
 			end
+		end,
+		"FN"=> function(name, parameter_names)
+			if !occursin(r"[A-Z_]", name)
+				throw("User-Made function names can only use characters 'A' to 'Z' and '_'")
+			end
+			if !occursin(r"[a-z_]*(,[a-z_]+)*", parameter_names)
+				trow("The parameter_names string should look like: \"first_var,second_var\"")
+			end
+
+			parameters = split(parameter_names, ",")
+			functions[name] = UserFunction(index+1, parameters)
+			skip(1)
 		end
 	)
 
 	tokens = []
-
-	function skip(n)
-		global index
-		println("SKIP")
-		for i in 1:n
-			index += 1
-			if tokens[index].type == Main.Lexer.FUNCTION_NAME
-				(_, arity) = getFunc(tokens[index].lexeme)
-				skip(arity)
-			end
-		end
-	end
-
-	function getFunc(name)
-		if !haskey(native_functions, name)
-			throw("Unknown function $name used")
-		end
-		func = native_functions[name]
-		arity = first(methods(func)).nargs-1
-		return (func, arity)
-	end
 
 	function interpret(tokens_)
 		
@@ -52,17 +90,18 @@ module Interpreter
 		global tokens
 		tokens = vcat(tokens,tokens_)
 
+		println(tokens)
+
 		out = nothing
-		while index < length(tokens)
-			index += 1
+		while index <= length(tokens)
 			out = evaluate(tokens[index])
+			index += 1
 		end
 
 		out
 	end
 
 	function evaluate(token)
-		println(token)
 		global index
 
 		if(token.type == Main.Lexer.FUNCTION_NAME)
@@ -74,7 +113,21 @@ module Interpreter
 				index +=1
 				push!(arguments, evaluate(tokens[index]))
 			end
-			return func(arguments...)
+
+			#User
+			if typeof(func) == UserFunction
+				for i in 1:length(arguments)
+					variables[func.parameters[i]] = arguments[i]
+				end
+				old_index = index
+				index = func.index
+				value = evaluate(tokens[func.index])
+				index = old_index
+				return value
+			#Native
+			else
+				return func(arguments...)
+			end
 		end
 		
 		if(token.type == Main.Lexer.IDENTIFIER)
@@ -93,6 +146,31 @@ module Interpreter
 		token.type == Main.Lexer.NUMBER ? Base.parse(Int, token.lexeme) :
 		throw("Unknown token type, this can't happen")
 		
+	end
+
+	function skip(n)
+		global index
+		for i in 1:n
+			index += 1
+			if tokens[index].type == Main.Lexer.FUNCTION_NAME
+				(_, arity) = getFunc(tokens[index].lexeme)
+				skip(arity)
+			end
+		end
+	end
+
+	function getFunc(name)
+		if !haskey(native_functions, name)
+			if !haskey(functions, name)
+				throw("Unknown function $name used")
+			end
+			func = functions[name]
+			arity = length(func.parameters)
+			return (func, arity)
+		end
+		func = native_functions[name]
+		arity = first(methods(func)).nargs-1
+		return (func, arity)
 	end
 
 	export interpret
