@@ -1,6 +1,8 @@
-module Parser
+# This is the tree Parser
+# Just need to finish it and make
+# it add functions when they get defined
 
-	include("tokentypes.jl")
+module Parser
 
 	#=
 
@@ -16,11 +18,12 @@ module Parser
 	=#
 
 	index = 1
-	failed = false
 
 	function parse(tokens_)
 
 		global index
+		index = 1
+
 		global tokens
 		tokens = tokens_
 
@@ -65,8 +68,10 @@ module Parser
 		"+"=>2
 	)
 	function call()
-		if !haskey(functions, current().lexeme)
-			throw("not exist bitch")
+		name = current().lexeme
+
+		if !haskey(functions, name)
+			throw("Unknown function $name used")
 		end
 
 		name = current().lexeme
@@ -74,22 +79,34 @@ module Parser
 
 		arity = functions[name]
 
+		if arity > length(tokens) - index
+			throw("Missing arguments on call $name")
+		end
+
 		advance()
 		for _ in 1:arity
 			push!(arguments, expression())
-			advance()
 		end
 
 		FUNC_CALL(name, arguments)
 	end
 
+	function identifier()
+		expr = VARIABLE(current().lexeme)
+		advance()
+		expr
+	end
+	
 	function literal()
-		current_is(Main.Lexer.TRUE) ? LITERAL(true) :
+		expr = current_is(Main.Lexer.TRUE) ? LITERAL(true) :
 		current_is(Main.Lexer.FALSE) ? LITERAL(false) :
 		current_is(Main.Lexer.NULL) ? LITERAL(nothing) :
 		current_is(Main.Lexer.STRING) ? LITERAL(current().lexeme) :
 		current_is(Main.Lexer.NUMBER) ? LITERAL(Base.parse(Int, current().lexeme)) :
 		throw("Unknown literal type, this can't happen")
+		
+		advance()
+		expr
 	end
 
 	struct FUNC_CALL
@@ -100,5 +117,11 @@ module Parser
 	struct LITERAL
 		value
 	end
+
+	struct VARIABLE
+		name
+	end
+
+	export parser, FUNC_CALL, LITERAL, VARIABLE
 
 end
