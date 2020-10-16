@@ -49,14 +49,6 @@ module Parser
 		index += 1
 	end
 
-	function next()
-		tokens[index+1]
-	end
-
-	function next_is(type)
-		typeof(next()) == type
-	end
-
 	function expression()
 		current_is(Main.Lexer.FUNCTION_NAME) ? call() :
 		current_is(Main.Lexer.IDENTIFIER) ? identifier() :
@@ -101,7 +93,7 @@ module Parser
 		expr = current_is(Main.Lexer.TRUE) ? LITERAL(true) :
 		current_is(Main.Lexer.FALSE) ? LITERAL(false) :
 		current_is(Main.Lexer.NULL) ? LITERAL(nothing) :
-		current_is(Main.Lexer.STRING) ? LITERAL(current().lexeme) :
+		current_is(Main.Lexer.STRING) ? LITERAL(current().lexeme[2:end]) :
 		current_is(Main.Lexer.NUMBER) ? LITERAL(Base.parse(Int, current().lexeme)) :
 		throw("Unknown literal type, this can't happen")
 		

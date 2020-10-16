@@ -2,10 +2,12 @@ include("lexer.jl")
 include("logger.jl")
 include("parser.jl")
 include("astprinter.jl")
+include("interpreter.jl")
 
 using .Lexer
 using .Parser
 using .ASTPrinter
+using .Interpreter
 
 function repl()
 	while true
@@ -16,6 +18,7 @@ function repl()
 			tokens = lex(input)
 			statements = Main.Parser.parse(tokens)
 			print_tree(statements)
+			interpret(tokens)
 		catch err
 			Logger.error(err)
 			throw(err)

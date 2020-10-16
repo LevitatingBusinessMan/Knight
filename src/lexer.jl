@@ -51,7 +51,7 @@ module Lexer
 			#string
 			elseif '"' == current_char
 				lexeme = consume_till('"')
-				push!(tokens, Token(STRING, lexeme[2:end]))
+				push!(tokens, Token(STRING, lexeme))
 
 			#comments
 			elseif "#" == current_char
