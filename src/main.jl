@@ -16,9 +16,9 @@ function repl()
 
 		try
 			tokens = lex(input)
-			statements = Main.Parser.parse(tokens)
-			print_tree(statements)
-			interpret(tokens)
+			#statements = Main.Parser.parse(tokens)
+			#print_tree(statements)
+			println(interpret(tokens))
 		catch err
 			Logger.error(err)
 			throw(err)

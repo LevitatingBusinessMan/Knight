@@ -92,7 +92,7 @@ module Lexer
 		while length(source)+1 != next && char != source[next]
 			next += 1
 		end
-		lexeme = source[index:next-1]
+		lexeme = source[index:next]
 		index = next+1
 		return lexeme
 	end
