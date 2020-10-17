@@ -30,7 +30,7 @@ module Interpreter
 
 	, function wil concat
 	, , "foo" "bar" ARRAY
-	will make "foo" "bar"
+	will make ["foo","bar"]
 
 	=#
 
@@ -75,14 +75,15 @@ module Interpreter
 				throw("User-Made function names can only use characters 'A' to 'Z' and '_'")
 			end
 			if !occursin(r"[a-z_]*(,[a-z_]+)*", parameter_names)
-				trow("The parameter_names string should look like: \"first_var,second_var\"")
+				trow("The parameter_string should look like: \"first_param,second_param\"")
 			end
 
-			parameters = split(parameter_names, ",")
+			parameters = parameter_names == "" ? [] : split(parameter_names, ",")
 			functions[name] = UserFunction(index+1, parameters)
 			skip(1)
 		end,
-		"EXIT"=> () -> exit()
+		"EXIT"=> () -> exit(),
+		";"=> (left, right) -> right
 	)
 
 	tokens = []
@@ -157,11 +158,13 @@ module Interpreter
 
 	function skip(n)
 		global index
+		print("ensure ")
+		println(n)
 		ensure_tokens(n)
 		for i in 1:n
 			index += 1
 			if tokens[index].type == Main.Lexer.FUNCTION_NAME
-				(_, arity) = getFunc(tokens[index].lexeme)
+				(f, arity) = getFunc(tokens[index].lexeme)
 				skip(arity)
 			end
 		end
@@ -181,8 +184,15 @@ module Interpreter
 		return (func, arity)
 	end
 
+	#=
+	FIX
+	check if next token after evaluating the previous argument
+	Not all at once before time
+	=#
+
 	function ensure_tokens(needed)
 		global tokens, index
+		println(length(tokens) - index)
 		if needed > length(tokens) - index
 			if !repl_mode
 				throw("Missing function arguments")
