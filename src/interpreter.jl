@@ -82,9 +82,7 @@ module Interpreter
 						value = func(arguments...)
 					end
 				catch err
-					println(err.message)
-					println(strip(err.message, "throw: "))
-					error(token, strip(err.message, "throw: "))
+					error(token, err.msg ? msg : "Enable debug mode for more info")
 				end
 
 			#End scope
@@ -128,7 +126,7 @@ module Interpreter
 	function getFunc(name)
 		if !haskey(native_functions, name)
 			if !haskey(functions, name)
-				throw("Unknown function $name used")
+				error("Unknown function $name used")
 			end
 			func = functions[name]
 			arity = length(func.parameters)
@@ -143,7 +141,7 @@ module Interpreter
 		global tokens, index
 		if needed > length(tokens) - index
 			if !repl_mode
-				throw("Missing function arguments")
+				error("Missing function arguments")
 			end
 			tokens = vcat(tokens, Main.get_more_tokens(needed - (length(tokens) - index)))
 			ensure_tokens(needed)
