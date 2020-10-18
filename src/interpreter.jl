@@ -9,20 +9,6 @@ module Interpreter
 	variables = [Dict()]
 
 	#=
-	Note about scopes
-	New function for getting a var
-	Array of variable dictionaries get searched by it. (also function dict)
-	Push new dict when running function
-	Pop dict when leaving function
-	
-	Index will be an array of indeces
-	You run a function, you push the index you're on
-	You finish it, pop it
-
-	New GLOBAL= function
-	=#
-
-	#=
 	Note about arrays
 	
 	Create with function ARRAY
@@ -39,52 +25,7 @@ module Interpreter
 
 	repl_mode = false
 
-	native_functions = Dict(
-		"ECHO"=> str -> println(str),
-		"+"=> function(left,right)
-			if (typeof(left) == Int && typeof(right) != Int || typeof(left) == String && typeof(right) != String)
-				throw("Can't add different types")
-			end
-			if (typeof(left) == String)
-				return string(left, right)
-			end
-			if (typeof(left) == Int)
-				return left + right
-			end
-			throw("You can only add strings or integers")
-		end,
-		"="=> function(name, value)
-			if !occursin(r"[a-z_]", name)
-				throw("Please use snake_case in variable names")
-			end
-			if typeof(name) != String
-				throw("Why are you trying to assign a value to a non-string name?")
-			end
-			variables[end-1][name] = value
-		end,
-		"!"=> value -> !value,
-		"EXIST"=> (name) -> first(get_var(name)),
-		"IF"=> function(value)
-			global index
-			if value != true
-				skip(1)
-			end
-		end,
-		"FN"=> function(name, parameter_names)
-			if !occursin(r"[A-Z_]", name)
-				throw("User-Made function names can only use characters 'A' to 'Z' and '_'")
-			end
-			if !occursin(r"[a-z_]*(,[a-z_]+)*", parameter_names)
-				trow("The parameter_string should look like: \"first_param,second_param\"")
-			end
-
-			parameters = parameter_names == "" ? [] : split(parameter_names, ",")
-			functions[name] = UserFunction(index+1, parameters)
-			skip(1)
-		end,
-		"EXIT"=> () -> exit(),
-		";"=> (left, right) -> right
-	)
+	include("natives.jl")
 
 	tokens = []
 

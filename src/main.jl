@@ -3,6 +3,7 @@ include("logger.jl")
 include("parser.jl")
 include("astprinter.jl")
 include("interpreter.jl")
+include("print_value.jl")
 
 using .Lexer
 using .Parser
@@ -18,7 +19,7 @@ function repl()
 			tokens = lex(input)
 			#statements = Main.Parser.parse(tokens)
 			#print_tree(statements)
-			println(interpret(tokens, true))
+			print_value(interpret(tokens, true))
 		catch err
 			Logger.error(err)
 			throw(err)
