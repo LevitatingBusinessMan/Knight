@@ -35,5 +35,9 @@ end
 if length(ARGS) < 1
 	repl();
 else
-	println("You didn't write that code yet")
+	source = open(ARGS[1]) do file
+    	read(file, String)
+	end
+	tokens = lex(source)
+	interpret(tokens, false)
 end
