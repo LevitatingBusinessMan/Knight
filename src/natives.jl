@@ -87,6 +87,20 @@ native_functions = Dict(
 			throw("You can only compare integers to integers")
 		end
 		left < right
+	end,
+	"INPUT"=> () -> readline(),
+	"OPEN_FD"=> function(filename, mode)
+		try
+			fd(open(filename, mode))
+		catch err
+			nothing
+		end
+	end,
+	"READ_FD"=> function(fd)
+		read(fdio(fd), String)
+	end,
+	"WRITE_FD"=> function(fd, string)
+		write(fdio(fd), string)
 	end
 )
 
