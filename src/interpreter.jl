@@ -158,8 +158,10 @@ module Interpreter
 
 	function skip(n)
 		global index
+		ensure_tokens(n) # (minimal)
 		for i in 1:n
 			index += 1
+			ensure_tokens(n - i) # Make sure the tokens didn't get used already
 			if tokens[index].type == Main.Lexer.FUNCTION_NAME
 				(f, arity) = getFunc(tokens[index].lexeme)
 				skip(arity)
@@ -183,7 +185,6 @@ module Interpreter
 
 	function ensure_tokens(needed)
 		global tokens, index
-		println(length(tokens) - index)
 		if needed > length(tokens) - index
 			if !repl_mode
 				throw("Missing function arguments")
