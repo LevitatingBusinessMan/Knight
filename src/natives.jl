@@ -1,5 +1,5 @@
 native_functions = Dict(
-	"ECHO"=> (value) -> print_value(value),
+	"ECHO"=> (value) -> Main.print_value(value),
 	"+"=> function(left,right)
 		if (typeof(left) == Int && typeof(right) != Int || typeof(left) == String && typeof(right) != String)
 			throw("Can't add different types")

@@ -67,19 +67,24 @@ module Interpreter
 
 			#New scope
 			push!(variables,Dict())
-
-				#User
-				if typeof(func) == UserFunction
-					for i in 1:length(arguments)
-						variables[end][func.parameters[i]] = arguments[i]
+				try
+					#User
+					if typeof(func) == UserFunction
+						for i in 1:length(arguments)
+							variables[end][func.parameters[i]] = arguments[i]
+						end
+						old_index = index
+						index = func.index
+						value = evaluate(tokens[func.index])
+						index = old_index
+					#Native
+					else
+						value = func(arguments...)
 					end
-					old_index = index
-					index = func.index
-					value = evaluate(tokens[func.index])
-					index = old_index
-				#Native
-				else
-					value = func(arguments...)
+				catch err
+					println(err.message)
+					println(strip(err.message, "throw: "))
+					error(token, strip(err.message, "throw: "))
 				end
 
 			#End scope
@@ -92,7 +97,7 @@ module Interpreter
 			name = token.lexeme
 			(exist, value) = get_var(name)
 			if !exist
-				throw("Unknown variable $name")
+				error(token,"Unknown variable $name")
 			end
 			return value
 		end
@@ -103,7 +108,7 @@ module Interpreter
 		token.type == Main.Lexer.NULL ? nothing :
 		token.type == Main.Lexer.STRING ? token.lexeme[2:end-1] :
 		token.type == Main.Lexer.NUMBER ? Base.parse(Int, token.lexeme) :
-		throw("Unknown token type, this can't happen")
+		error(token,"Unknown token type, this can't happen")
 		
 	end
 
@@ -157,6 +162,15 @@ module Interpreter
 	end
 
 	export interpret
+
+	function error(token, msg)
+		throw(InterpretationError(msg, token.line))
+	end
+
+	struct InterpretationError <: Exception
+		msg::String
+		line::Integer
+	end
 
 end
 

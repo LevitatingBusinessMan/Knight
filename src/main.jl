@@ -39,6 +39,11 @@ else
 	source = open(ARGS[1]) do file
     	read(file, String)
 	end
-	tokens = lex(source)
-	interpret(tokens, false)
+	try
+		tokens = lex(source)
+		interpret(tokens, false)
+	catch err
+		Logger.error(err)
+		throw(err)
+	end
 end

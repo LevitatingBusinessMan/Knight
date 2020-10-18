@@ -5,12 +5,17 @@ module Lexer
 	struct Token
 		type::TokenType
 		lexeme::String
+		line::Int
 	end
 
 	#type declarations on global variables are not yet supported
 	index = 1
 	source = ""
-	line = 0
+	line = 1
+
+	function new_token(type, lexeme)
+		Token(type, lexeme, line)
+	end
 
 	function lex(source_)
 
@@ -29,7 +34,7 @@ module Lexer
 			#function_name
 			if occursin(r"[A-Z!=<>\-=+*/;_,]", string(current_char))
 				lexeme = consume(r"[A-Z!=<>\-=+*/;_]")
-				push!(tokens, Token(FUNCTION_NAME, lexeme))
+				push!(tokens, new_token(FUNCTION_NAME, lexeme))
 
 			#identifier
 			elseif occursin(r"[a-z_,]", string(current_char))
@@ -40,25 +45,25 @@ module Lexer
 					: lexeme == "null" ? NULL
 					: IDENTIFIER)
 
-				push!(tokens, Token(type, lexeme))
+				push!(tokens, new_token(type, lexeme))
 
 			#numbers
 			# I'll add floats later
 			elseif occursin(r"[0-9]", string(current_char))
 				lexeme = consume(r"[0-9]")
-				push!(tokens, Token(NUMBER, lexeme))
+				push!(tokens, new_token(NUMBER, lexeme))
 
 			#string
 			elseif '"' == current_char
 				lexeme = consume_till('"')
-				push!(tokens, Token(STRING, lexeme))
+				push!(tokens, new_token(STRING, lexeme))
 
 			#comments
-			elseif "#" == current_char
-				consume_till("\n")
+			elseif '#' == current_char
+				consume_till('\n')
 	
 			#increase linenum
-			elseif "\n" == current_char
+			elseif '\n' == current_char
 				line += 1
 				index += 1
 			
