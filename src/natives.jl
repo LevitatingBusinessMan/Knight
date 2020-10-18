@@ -81,7 +81,16 @@ native_functions = Dict(
 		end
 		left - right
 	end,
-	"=="=> (left, right) -> left == right
+	"=="=> (left, right) -> left == right,
+	"<"=> function(left, right) 
+		if (typeof(left) == Int && typeof(right) != Int)
+			throw("You can only compare integers to integers")
+		end
+		left < right
+	end
 )
 
-export native_functions
+#These contain a branch
+skippers = ["IF","FN"]
+
+export native_functions, skippers

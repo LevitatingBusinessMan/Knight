@@ -6,11 +6,11 @@ module Parser
 
 	#=
 
-	expression
-		literal | call | identifier
-
 	call
 		function_name expression*
+	
+	expression
+		 call | identifier | literal
 
 	literal
 		STRING | NUMBER | "true" | "false" | "null"
@@ -18,6 +18,8 @@ module Parser
 	=#
 
 	index = 1
+
+	user_functions = Dict()
 
 	function parse(tokens_)
 
@@ -55,25 +57,34 @@ module Parser
 		literal()
 	end
 
-	functions = Dict(
-		"ECHO"=>1,
-		"+"=>2
-	)
 	function call()
 		name = current().lexeme
 
-		if !haskey(functions, name)
-			throw("Unknown function $name used")
+		if name == "FN"
+			func_name = tokens[index+1].lexeme[2:end-1]
+			parameter_names = tokens[index+2].lexeme
+			arity = length(split(parameter_names, ","))
+			user_functions[func_name] = arity
 		end
 
-		name = current().lexeme
-		arguments = []
-
-		arity = functions[name]
+		arity = nothing
+		if !haskey(Main.Interpreter.native_functions, name)
+			if !haskey(user_functions, name)
+				throw("Unknown function $name used")
+			end
+			arity = user_functions[name]
+		else
+			arity = first(methods(Main.Interpreter.native_functions[name])).nargs-1
+			if in(Main.Interpreter.skippers)(name)
+				arity += 1
+			end
+		end
 
 		if arity > length(tokens) - index
 			throw("Missing arguments on call $name")
 		end
+
+		arguments = []
 
 		advance()
 		for _ in 1:arity

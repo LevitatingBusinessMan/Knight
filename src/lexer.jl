@@ -23,11 +23,14 @@ module Lexer
 		global source
 		global line
 
-		line = 0
+		line = 1
 		index = 1
 		source = source_
 		tokens = []
 	
+		#So a comment on the end doesn't mess stuff up
+		source = string(source, "\n")
+
 		while index <= length(source)
 			current_char = source[index]
 

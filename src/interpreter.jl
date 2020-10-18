@@ -53,7 +53,7 @@ module Interpreter
 		if(token.type == Main.Lexer.FUNCTION_NAME)
 			global tokens
 			name = token.lexeme
-			(func, arity) = getFunc(name)
+			(func, arity) = get_func(name)
 			arguments = []
 
 			ensure_tokens(arity)
@@ -117,13 +117,20 @@ module Interpreter
 			index += 1
 			ensure_tokens(n - i) # Make sure the tokens didn't get used already
 			if tokens[index].type == Main.Lexer.FUNCTION_NAME
-				(f, arity) = getFunc(tokens[index].lexeme)
+				name = tokens[index].lexeme
+				(f, arity) = get_func(name)
+
+				#These contain a branch
+				if in(skippers)(name)
+					arity += 1
+				end
+
 				skip(arity)
 			end
 		end
 	end
 
-	function getFunc(name)
+	function get_func(name)
 		if !haskey(native_functions, name)
 			if !haskey(functions, name)
 				error("Unknown function $name used")

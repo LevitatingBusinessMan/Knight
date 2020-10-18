@@ -10,6 +10,9 @@ using .Parser
 using .ASTPrinter
 using .Interpreter
 
+parser_flag = in(ARGS)("-p")
+filter!(arg -> arg != "-s", ARGS)
+
 function repl()
 	while true
 		print("(knight)> ")
@@ -17,8 +20,10 @@ function repl()
 
 		try
 			tokens = lex(input)
-			#statements = Main.Parser.parse(tokens)
-			#print_tree(statements)
+			if parser_flag
+				statements = Main.Parser.parse(tokens)
+				print_tree(statements)
+			end
 			print_value(interpret(tokens, true))
 		catch err
 			Logger.error(err)
@@ -41,6 +46,10 @@ else
 	end
 	try
 		tokens = lex(source)
+		if parser_flag
+			statements = Main.Parser.parse(tokens)
+			print_tree(statements)
+		end
 		interpret(tokens, false)
 	catch err
 		Logger.error(err)
