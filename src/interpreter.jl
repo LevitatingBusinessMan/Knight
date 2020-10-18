@@ -6,7 +6,7 @@ module Interpreter
 	end
 
 	functions = Dict()
-	variables = Dict()
+	variables = [Dict()]
 
 	#=
 	Note about scopes
@@ -60,10 +60,10 @@ module Interpreter
 			if typeof(name) != String
 				throw("Why are you trying to assign a value to a non-string name?")
 			end
-			variables[name] = value
+			variables[end-1][name] = value
 		end,
 		"!"=> value -> !value,
-		"EXIST"=> (name) -> haskey(variables, name),
+		"EXIST"=> (name) -> first(get_var(name)),
 		"IF"=> function(value)
 			global index
 			if value != true
@@ -122,28 +122,38 @@ module Interpreter
 				push!(arguments, evaluate(tokens[index]))
 			end
 
-			#User
-			if typeof(func) == UserFunction
-				for i in 1:length(arguments)
-					variables[func.parameters[i]] = arguments[i]
+			value = nothing
+
+			#New scope
+			push!(variables,Dict())
+
+				#User
+				if typeof(func) == UserFunction
+					for i in 1:length(arguments)
+						variables[end][func.parameters[i]] = arguments[i]
+					end
+					old_index = index
+					index = func.index
+					value = evaluate(tokens[func.index])
+					index = old_index
+				#Native
+				else
+					value = func(arguments...)
 				end
-				old_index = index
-				index = func.index
-				value = evaluate(tokens[func.index])
-				index = old_index
-				return value
-			#Native
-			else
-				return func(arguments...)
-			end
+
+			#End scope
+			pop!(variables)
+
+			return value
 		end
 		
 		if(token.type == Main.Lexer.IDENTIFIER)
 			name = token.lexeme
-			if !haskey(variables, name)
+			(exist, value) = get_var(name)
+			if !exist
 				throw("Unknown variable $name")
 			end
-			return variables[name]
+			return value
 		end
 
 		#Literal
@@ -192,6 +202,17 @@ module Interpreter
 			tokens = vcat(tokens, Main.get_more_tokens(needed - (length(tokens) - index)))
 			ensure_tokens(needed)
 		end
+	end
+
+	function get_var(name)
+		index = length(variables)
+		while index > 0
+			if haskey(variables[index], name)
+				return (true, variables[index][name])
+			end
+			index -= 1
+		end
+		return (false, nothing)
 	end
 
 	export interpret
