@@ -54,6 +54,11 @@ module Interpreter
 			global tokens
 			name = token.lexeme
 			(func, arity) = get_func(name)
+
+			if func == nothing 
+				error_token(token, "Unknown function $name used")
+			end
+
 			arguments = []
 
 			ensure_tokens(arity)
@@ -82,7 +87,11 @@ module Interpreter
 						value = func(arguments...)
 					end
 				catch err
-					error(token, err.msg ? msg : "Enable debug mode for more info")
+					if in(:msg, fieldnames(typeof(err)))
+						error_token(token, err.msg)
+					else
+						throw(err)
+					end
 				end
 
 			#End scope
@@ -95,7 +104,7 @@ module Interpreter
 			name = token.lexeme
 			(exist, value) = get_var(name)
 			if !exist
-				error(token,"Unknown variable $name")
+				error_token(token,"Unknown variable $name")
 			end
 			return value
 		end
@@ -106,7 +115,7 @@ module Interpreter
 		token.type == Main.Lexer.NULL ? nothing :
 		token.type == Main.Lexer.STRING ? token.lexeme[2:end-1] :
 		token.type == Main.Lexer.NUMBER ? Base.parse(Int, token.lexeme) :
-		error(token,"Unknown token type, this can't happen")
+		error_token(token,"Unknown token type, this can't happen")
 		
 	end
 
@@ -119,6 +128,10 @@ module Interpreter
 			if tokens[index].type == Main.Lexer.FUNCTION_NAME
 				name = tokens[index].lexeme
 				(f, arity) = get_func(name)
+
+				if f == nothing
+					error_token(token, "Unknown function $name used")
+				end
 
 				#These contain a branch
 				if in(skippers)(name)
@@ -133,7 +146,8 @@ module Interpreter
 	function get_func(name)
 		if !haskey(native_functions, name)
 			if !haskey(functions, name)
-				error("Unknown function $name used")
+				#error("Unknown function $name used")
+				return (nothing, nothing)
 			end
 			func = functions[name]
 			arity = length(func.parameters)
@@ -168,7 +182,7 @@ module Interpreter
 
 	export interpret
 
-	function error(token, msg)
+	function error_token(token, msg)
 		throw(InterpretationError(msg, token.line))
 	end
 

@@ -11,7 +11,11 @@ using .ASTPrinter
 using .Interpreter
 
 parser_flag = in(ARGS)("-p")
-filter!(arg -> arg != "-s", ARGS)
+filter!(arg -> arg != "-p", ARGS)
+
+debug_flag = in(ARGS)("--debug")
+filter!(arg -> arg != "--debug", ARGS)
+
 
 function repl()
 	while true
@@ -27,7 +31,9 @@ function repl()
 			print_value(interpret(tokens, true))
 		catch err
 			Logger.error(err)
-			throw(err)
+			if debug_flag
+				throw(err)
+			end
 		end
 	end
 end
@@ -53,6 +59,8 @@ else
 		interpret(tokens, false)
 	catch err
 		Logger.error(err)
-		throw(err)
+		if debug_flag
+			throw(err)
+		end
 	end
 end
