@@ -158,9 +158,6 @@ module Interpreter
 
 	function skip(n)
 		global index
-		print("ensure ")
-		println(n)
-		ensure_tokens(n)
 		for i in 1:n
 			index += 1
 			if tokens[index].type == Main.Lexer.FUNCTION_NAME
@@ -183,12 +180,6 @@ module Interpreter
 		arity = first(methods(func)).nargs-1
 		return (func, arity)
 	end
-
-	#=
-	FIX
-	check if next token after evaluating the previous argument
-	Not all at once before time
-	=#
 
 	function ensure_tokens(needed)
 		global tokens, index

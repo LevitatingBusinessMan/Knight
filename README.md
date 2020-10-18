@@ -37,9 +37,9 @@ The `;` function takes 2 expressions as its arguments.
 Then returns the value of the second.
 This way you can turn a list of expressions into 1
 ```
-FN "GREET" "name1,name2,name3"
-	; ECHO + "Hello " name1
-	; ECHO + "Hello " name2
-	ECHO + "Hello " name3
+FN "GREET" "name_one,name_two,name_three"
+	; ECHO + "Hello " name_one
+	; ECHO + "Hello " name_two
+	ECHO + "Hello " name_three
 GREET "Eren" "Mikasa" "Armin"
 ```

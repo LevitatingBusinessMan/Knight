@@ -9,6 +9,7 @@
 			"request": "launch",
 			"name": "Run knight",
 			"program": "${workspaceFolder}/src/main.jl",
+			"args": ["test.kn"],
 			"stopOnEntry": false,
 			"cwd": "${workspaceFolder}",
 			"juliaEnv": "${command:activeJuliaEnvironment}"

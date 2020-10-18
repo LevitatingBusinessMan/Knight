@@ -27,12 +27,12 @@ module Lexer
 			current_char = source[index]
 
 			#function_name
-			if occursin(r"[A-Z!=<>\-=+*/;_]", string(current_char))
+			if occursin(r"[A-Z!=<>\-=+*/;_,]", string(current_char))
 				lexeme = consume(r"[A-Z!=<>\-=+*/;_]")
 				push!(tokens, Token(FUNCTION_NAME, lexeme))
 
 			#identifier
-			elseif occursin(r"[a-z_]", string(current_char))
+			elseif occursin(r"[a-z_,]", string(current_char))
 				lexeme = consume(r"[a-z_]")
 
 				type = (lexeme == "true" ? TRUE
