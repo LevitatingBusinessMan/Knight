@@ -63,7 +63,11 @@ module Parser
 		if name == "FN"
 			func_name = tokens[index+1].lexeme[2:end-1]
 			parameter_names = tokens[index+2].lexeme
-			arity = length(split(parameter_names, ","))
+			if split(parameter_names, ",")[1] == "\"\""
+				arity = 0
+			else
+				arity = length(split(parameter_names, ","))
+			end
 			user_functions[func_name] = arity
 		end
 

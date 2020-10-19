@@ -64,6 +64,7 @@ module Lexer
 			#comments
 			elseif '#' == current_char
 				consume_till('\n')
+				line += 1
 	
 			#increase linenum
 			elseif '\n' == current_char
@@ -71,7 +72,7 @@ module Lexer
 				index += 1
 			
 			#unknown
-			elseif occursin(r"\s", string(current_char))
+			elseif occursin(r"[\s()]", string(current_char))
 				index += 1
 			else
 				error("Unknown token '$(current_char)'")

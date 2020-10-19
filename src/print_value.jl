@@ -19,6 +19,7 @@ function print_value(value, newline=true)
 
 	# Assuming it'll print fine
 	print_(value)
+	return value
 end
 
 export print_value

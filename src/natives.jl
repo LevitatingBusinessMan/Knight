@@ -1,8 +1,8 @@
 native_functions = Dict(
 	"ECHO"=> (value) -> Main.print_value(value),
 	"+"=> function(left,right)
-		if (typeof(left) == Int && typeof(right) != Int || typeof(left) == String && typeof(right) != String)
-			throw("Can't add different types")
+		if (typeof(left) == Int && typeof(right) != Int)
+			error("Can only add ints to ints and strings/ints to strings")
 		end
 		if (typeof(left) == String)
 			return string(left, right)
@@ -10,14 +10,14 @@ native_functions = Dict(
 		if (typeof(left) == Int)
 			return left + right
 		end
-		throw("You can only add strings or integers")
+		error("You can only add strings or integers")
 	end,
 	"="=> function(name, value)
 		if !occursin(r"[a-z_]", name)
-			throw("Please use snake_case in variable names")
+			error("Please use snake_case in variable names")
 		end
 		if typeof(name) != String
-			throw("Why are you trying to assign a value to a non-string name?")
+			error("Why are you trying to assign a value to a non-string name?")
 		end
 		variables[end-1][name] = value
 	end,
@@ -31,7 +31,7 @@ native_functions = Dict(
 	end,
 	"FN"=> function(name, parameter_names)
 		if !occursin(r"[A-Z_]", name)
-			throw("User-Made function names can only use characters 'A' to 'Z' and '_'")
+			error("User-Made function names can only use characters 'A' to 'Z' and '_'")
 		end
 		if !occursin(r"[a-z_]*(,[a-z_]+)*", parameter_names)
 			trow("The parameter_string should look like: \"first_param,second_param\"")
@@ -45,48 +45,52 @@ native_functions = Dict(
 	";"=> (left, right) -> right,
 	"GLOBAL="=> function(name, value)
 		if !occursin(r"[a-z_]", name)
-			throw("Please use snake_case in variable names")
+			error("Please use snake_case in variable names")
 		end
 		if typeof(name) != String
-			throw("Why are you trying to assign a value to a non-string name?")
+			error("Why are you trying to assign a value to a non-string name?")
 		end
 		variables[begin][name] = value
 	end,
 	"ARRAY"=> () -> [],
 	","=> (left, right) -> vcat(left,right),
-	"INDEX"=> function(index, array)
+	"INDEX"=> function(index, value)
 		if typeof(index) != Int
-			throw("Array indeces should be integers, not $index")
+			error("Array indeces should be integers, not $index")
 		end
-		if !(array isa Array)
-			throw("Attempting to access an array that ins't an array")
-		end
-		array[index]
+		value[index]
 	end,
 	"PUSH"=> function(value,array)
 		if !(array isa Array)
-			throw("Attempting to push to an array that ins't an array")
+			error("Attempting to push to an array that ins't an array")
 		end
 		push!(array,value)
 	end,
 	"POP"=> function(array)
 		if !(array isa Array)
-			throw("Attempting to pop an array that ins't an array")
+			error("Attempting to pop an array that ins't an array")
 		end
 		pop!(array)
 	end,
 	"-"=> function(left, right)
 		if (typeof(left) == Int && typeof(right) != Int)
-			throw("You can only subtract integers from integers")
+			error("You can only subtract integers from integers")
 		end
 		left - right
 	end,
 	"=="=> (left, right) -> left == right,
+	"!="=> (left, right) -> left != right,
 	"<"=> function(left, right) 
 		if (typeof(left) == Int && typeof(right) != Int)
-			throw("You can only compare integers to integers")
+			error("You can only compare integers to integers")
 		end
 		left < right
+	end,
+	">"=> function(left, right) 
+		if (typeof(left) == Int && typeof(right) != Int)
+			error("You can only compare integers to integers")
+		end
+		left > right
 	end,
 	"INPUT"=> () -> readline(),
 	"OPEN_FD"=> function(filename, mode)
@@ -101,6 +105,20 @@ native_functions = Dict(
 	end,
 	"WRITE_FD"=> function(fd, string)
 		write(fdio(fd), string)
+	end,
+	"SPLIT"=> function(string, split_string)
+		if typeof(string) != String && typeof(split_string) != String
+			error("You can only split strings")
+		end
+		split(string,split_string)
+	end,
+	"ARGS"=> () -> ARGS,
+	"LENGTH"=> (value) -> length(value),
+	"INDEX="=> function(index, array, value)
+		if typeof(index) != Int
+			error("Array indeces should be integers, not $index")
+		end
+		array[index] = value
 	end
 )
 

@@ -33,15 +33,31 @@ module Interpreter
 		
 		global index
 		global tokens
+		old_tokens = tokens
 		tokens = vcat(tokens,tokens_)
 
 		global repl_mode
 		repl_mode = repl_mode_
 
 		out = nothing
-		while index <= length(tokens)
-			out = evaluate(tokens[index])
-			index += 1
+		
+		try
+			while index <= length(tokens)
+				out = evaluate(tokens[index])
+				index += 1
+			end
+		catch err
+			current = tokens[index]
+
+			#Remove bad code
+			tokens = old_tokens
+
+			if in(:msg, fieldnames(typeof(err)))
+				error_token(current, err.msg)
+			else
+				throw(err)
+			end
+
 		end
 
 		out
@@ -65,6 +81,7 @@ module Interpreter
 
 			for i in 1:arity
 				index +=1
+				ensure_tokens(arity - i) # Make sure the tokens didn't get used already
 				push!(arguments, evaluate(tokens[index]))
 			end
 
@@ -72,27 +89,21 @@ module Interpreter
 
 			#New scope
 			push!(variables,Dict())
-				try
-					#User
-					if typeof(func) == UserFunction
-						for i in 1:length(arguments)
-							variables[end][func.parameters[i]] = arguments[i]
-						end
-						old_index = index
-						index = func.index
-						value = evaluate(tokens[func.index])
-						index = old_index
-					#Native
-					else
-						value = func(arguments...)
-					end
-				catch err
-					if in(:msg, fieldnames(typeof(err)))
-						error_token(token, err.msg)
-					else
-						throw(err)
-					end
+
+			#User
+			if typeof(func) == UserFunction
+				for i in 1:length(arguments)
+					variables[end][func.parameters[i]] = arguments[i]
 				end
+				old_index = index
+				index = func.index
+				value = evaluate(tokens[func.index])
+				index = old_index
+			#Native
+			else
+				value = func(arguments...)
+			end
+
 
 			#End scope
 			pop!(variables)
@@ -130,7 +141,7 @@ module Interpreter
 				(f, arity) = get_func(name)
 
 				if f == nothing
-					error_token(token, "Unknown function $name used")
+					error_token(tokens[index], "Unknown function $name used")
 				end
 
 				#These contain a branch

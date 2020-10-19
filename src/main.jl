@@ -50,6 +50,8 @@ else
 	source = open(ARGS[1]) do file
     	read(file, String)
 	end
+	#Where the fuck did shift! go?
+	splice!(ARGS,1)
 	try
 		tokens = lex(source)
 		if parser_flag

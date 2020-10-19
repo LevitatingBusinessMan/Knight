@@ -53,6 +53,12 @@ Use the `=` function to create a variable
 = "foo" "bar"
 ```
 
+#### Control flow
+The `IF` function skips a statement if it's condition is false
+```
+IF < cookies 1 ECHO "We are out of cookies!"
+```
+
 #### Create function
 Functions in Knight are a bit weird.
 You use the `FN` function, which takes a function name,
