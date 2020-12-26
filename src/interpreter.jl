@@ -47,6 +47,10 @@ module Interpreter
 				index += 1
 			end
 		catch err
+
+			while length(tokens) < index
+				index -= 1
+			end
 			current = tokens[index]
 
 			#Remove bad code
@@ -71,8 +75,12 @@ module Interpreter
 			name = token.lexeme
 			(func, arity) = get_func(name)
 
-			if func == nothing 
-				error_token(token, "Unknown function $name used")
+			if typeof(func) == UserFunction && func.index < 0
+				error("Refusing to run initiliazed function")
+			end
+
+			if func == nothing
+				error("Unknown function $name used")
 			end
 
 			arguments = []
@@ -97,6 +105,8 @@ module Interpreter
 				end
 				old_index = index
 				index = func.index
+				println("JUMP")
+				println(tokens[func.index])
 				value = evaluate(tokens[func.index])
 				index = old_index
 			#Native
@@ -115,7 +125,7 @@ module Interpreter
 			name = token.lexeme
 			(exist, value) = get_var(name)
 			if !exist
-				error_token(token,"Unknown variable $name")
+				error("Unknown variable $name")
 			end
 			return value
 		end
@@ -126,7 +136,7 @@ module Interpreter
 		token.type == Main.Lexer.NULL ? nothing :
 		token.type == Main.Lexer.STRING ? token.lexeme[2:end-1] :
 		token.type == Main.Lexer.NUMBER ? Base.parse(Int, token.lexeme) :
-		error_token(token,"Unknown token type, this can't happen")
+		error("Unknown token type, this can't happen")
 		
 	end
 
@@ -140,8 +150,24 @@ module Interpreter
 				name = tokens[index].lexeme
 				(f, arity) = get_func(name)
 
+				# Even if the FN function isn't run yet we can try to guess it's arity
+				if name == "FN"
+					if tokens[index+1].type == Main.Lexer.STRING && tokens[index+2].type == Main.Lexer.STRING
+						ensure_tokens(2)
+						func_name = tokens[index+1].lexeme[2:end-1]
+						parameter_names = tokens[index+2].lexeme
+						if split(parameter_names, ",")[1] == "\"\""
+							arity = 0
+						else
+							arity = length(split(parameter_names, ","))
+						end
+						functions[func_name] = UserFunction(-1,arity)
+					end
+				end
+
+
 				if f == nothing
-					error_token(tokens[index], "Unknown function $name used")
+					error("Unknown function $name used (can't guess arity)")
 				end
 
 				#These contain a branch

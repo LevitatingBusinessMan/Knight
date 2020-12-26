@@ -14,7 +14,7 @@ module ASTPrinter
 
 		global depth
 
-		print("\t" ^ depth)
+		print("  " ^ depth)
 
 		if (typeof(statement) == Main.Parser.FUNC_CALL)
 			depth += 1
@@ -27,7 +27,7 @@ module ASTPrinter
 				print("\n")
 			end
 			depth -= 1
-			print("\t" ^ depth)
+			print("  " ^ depth)
 			print(")")
 			return
 		end

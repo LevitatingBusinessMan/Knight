@@ -24,7 +24,6 @@ native_functions = Dict(
 	"!"=> value -> !value,
 	"EXIST"=> (name) -> first(get_var(name)),
 	"IF"=> function(value)
-		global index
 		if value != true
 			skip(1)
 		end
