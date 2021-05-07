@@ -1,0 +1,63 @@
+IF < LENGTH ARGS 1 ; ECHO "Need a filename" EXIT
+= "filename" INDEX 1 ARGS
+
+= "fd" OPEN_FD filename "r"
+IF == fd null ; ECHO "File not found" EXIT
+= "instructions" SPLIT (READ_FD fd) ""
+
+= "ip" 1
+= "sp" 1
+
+= "stack" , 0 ARRAY
+
+= "depth" 1
+
+FN "JUMP" ""
+	; GLOBAL= "ip" + ip 1
+	; IF == (INDEX ip instructions) "[" GLOBAL= "depth" + depth 1
+	; IF && == (INDEX ip instructions) "]" != depth 1;  GLOBAL= "depth" - depth 1 JUMP
+	IF != (INDEX ip instructions) "]" JUMP
+
+FN "BACK" ""
+	; GLOBAL= "ip" - ip 1
+	; IF == (INDEX ip instructions) "]" GLOBAL= "depth" + depth 1
+	; IF && == (INDEX ip instructions) "[" != depth 1;  GLOBAL= "depth" - depth 1 BACK
+	IF != (INDEX ip instructions) "[" BACK
+
+FN "EVALUATE" ""
+	; = "inst" INDEX ip instructions
+	
+	# Increase pointer
+	; IF == inst ">" GLOBAL= "sp" + sp 1
+
+	# Decrease pointer
+	; IF == inst "<" GLOBAL= "sp" - sp 1
+
+	# Increase value
+	; IF == inst "+" INDEX= sp stack (+ INDEX sp stack 1)
+	
+	# Decrease value
+	; IF == inst "-" INDEX= sp stack (- INDEX sp stack 1)
+
+	# Log value
+	; IF == inst "." WRITE_FD 1 INDEX sp stack
+
+	# Prompt value
+	# Doesn't really work, can't convert to int
+	; IF == inst "," INDEX= sp stack INPUT
+
+	# Jump
+	; IF == inst "[" IF == INDEX sp stack 0 JUMP
+
+	# Jump back
+	; IF == inst "]" IF != INDEX sp stack 0 BACK
+
+	# Dynamically increase stack if needed
+	; IF > sp LENGTH stack PUSH 0 stack
+
+	; GLOBAL= "ip" + ip 1
+	; IF < ip LENGTH instructions
+		EVALUATE
+	EXIT
+
+EVALUATE
