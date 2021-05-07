@@ -1,5 +1,8 @@
 native_functions = Dict(
-	"ECHO"=> (value) -> Main.print_value(value),
+	"ECHO"=> function(value)
+		Main.print_value(value)
+		return nothing
+	end,
 	"+"=> function(left,right)
 		if (typeof(left) == Int && typeof(right) != Int)
 			error("Can only add ints to ints and strings/ints to strings")
@@ -24,9 +27,16 @@ native_functions = Dict(
 	"!"=> value -> !value,
 	"EXIST"=> (name) -> first(get_var(name)),
 	"IF"=> function(value)
-		if value != true
-			skip(1)
+		global index
+		global tokens
+
+		old_index = index
+		index += 1
+		if value == true
+			evaluate(tokens[index])
 		end
+		index = old_index
+		skip(1)
 	end,
 	"FN"=> function(name, parameter_names)
 		if !occursin(r"[A-Z_]", name)
@@ -79,6 +89,8 @@ native_functions = Dict(
 	end,
 	"=="=> (left, right) -> left == right,
 	"!="=> (left, right) -> left != right,
+	"&&"=> (left, right) -> left && right,
+	"||"=> (left, right) -> left || right,
 	"<"=> function(left, right) 
 		if (typeof(left) == Int && typeof(right) != Int)
 			error("You can only compare integers to integers")
@@ -100,10 +112,12 @@ native_functions = Dict(
 		end
 	end,
 	"READ_FD"=> function(fd)
-		read(fdio(fd), String)
+		read(fdio(fd, false), String)
 	end,
 	"WRITE_FD"=> function(fd, string)
-		write(fdio(fd), string)
+		io = fdio(fd, false)
+		write(io, string)
+		flush(io)
 	end,
 	"SPLIT"=> function(string, split_string)
 		if typeof(string) != String && typeof(split_string) != String

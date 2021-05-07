@@ -105,8 +105,6 @@ module Interpreter
 				end
 				old_index = index
 				index = func.index
-				println("JUMP")
-				println(tokens[func.index])
 				value = evaluate(tokens[func.index])
 				index = old_index
 			#Native
@@ -117,7 +115,6 @@ module Interpreter
 
 			#End scope
 			pop!(variables)
-
 			return value
 		end
 		

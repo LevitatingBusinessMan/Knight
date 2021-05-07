@@ -35,8 +35,8 @@ module Lexer
 			current_char = source[index]
 
 			#function_name
-			if occursin(r"[A-Z!=<>\-=+*/;_,]", string(current_char))
-				lexeme = consume(r"[A-Z!=<>\-=+*/;_]")
+			if occursin(r"[A-Z!=<>\-=+*/;_,&|]", string(current_char))
+				lexeme = consume(r"[A-Z!=<>\-=+*/;_,&|]")
 				push!(tokens, new_token(FUNCTION_NAME, lexeme))
 
 			#identifier
