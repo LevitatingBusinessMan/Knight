@@ -119,6 +119,7 @@ native_functions = Dict(
 		write(io, string)
 		flush(io)
 	end,
+	"CLOSE_FD" => (fd) -> close(fdio(fd)),
 	"SPLIT"=> function(string, split_string)
 		if typeof(string) != String && typeof(split_string) != String
 			error("You can only split strings")
