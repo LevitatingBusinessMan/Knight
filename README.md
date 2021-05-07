@@ -24,7 +24,7 @@ ECHO FIB 10
 ```
 
 #### REPL
-[![asciicast](https://asciinema.org/a/zEFUTHG6pYRP3UW7zOvvj9rkV.svg)](https://asciinema.org/a/zEFUTHG6pYRP3UW7zOvvj9rkV)
+[![asciicast](https://asciinema.org/a/412684.svg)](https://asciinema.org/a/412684)
 
 #### Grammar syntax
 ```
