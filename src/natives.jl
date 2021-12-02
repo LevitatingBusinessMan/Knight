@@ -87,6 +87,18 @@ native_functions = Dict(
 		end
 		left - right
 	end,
+	"*"=> function(left, right)
+		if (typeof(left) == Int && typeof(right) != Int)
+			error("You can only multiply integers with integers")
+		end
+		left * right
+	end,
+	"/"=> function(left, right)
+		if (typeof(left) == Int && typeof(right) != Int)
+			error("You can only divide integers from integers")
+		end
+		left / right
+	end,
 	"=="=> (left, right) -> left == right,
 	"!="=> (left, right) -> left != right,
 	"&&"=> (left, right) -> left && right,
@@ -135,7 +147,7 @@ native_functions = Dict(
 		array[index] = value
 	end,
 	"ATOI"=> function(value)
-		if typeof(value) != String
+		if typeof(value) != String && typeof(value) != SubString{String}
 			error("Can't use atoi on non-string value")
 		end
 		try

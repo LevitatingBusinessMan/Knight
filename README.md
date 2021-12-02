@@ -7,8 +7,8 @@ Something is either a function, variable identifier, or a literal.
 There is no parser.
 I did write one, though mostly for debugging purposes.
 The interpreter doesn't use it. The polish notation of the language means that the interpreter can work without any parsing tree.
-It can parse the tokens from the scanner during runtime instead. So it is somewhat parsing, it just parses and runs every single statement it finds.
-It's almost like brainfuck in the sense that all statements form a tape, and control flow is handled simply by moving an instruction pointer.
+The interpreter simply runs on the tokens created by the scanner, and matches functions with arguments on the go.
+The code is completely linear in the eyes of the interpreter, control flow is done by jumping to a certain token/statement in the code.
 This does make the interpeter fairly complex, because it has to be able to parse expression groups on the go. For instance when it reaches an IF statement with a false value, it has to figure out where the next expression starts that isn't part of the IF statements body. This sometimes means guessing the arity of user-defined functions before they are even initialized.
 
 It can however be useful to parse the code for debugging purposes.

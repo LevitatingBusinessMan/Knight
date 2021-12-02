@@ -40,7 +40,7 @@ module Lexer
 				push!(tokens, new_token(FUNCTION_NAME, lexeme))
 
 			#identifier
-			elseif occursin(r"[a-z_,]", string(current_char))
+			elseif occursin(r"[a-z_]", string(current_char))
 				lexeme = consume(r"[a-z_]")
 
 				type = (lexeme == "true" ? TRUE
