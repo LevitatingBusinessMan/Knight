@@ -133,6 +133,16 @@ native_functions = Dict(
 			error("Array indeces should be integers, not $index")
 		end
 		array[index] = value
+	end,
+	"ATOI"=> function(value)
+		if typeof(value) != String
+			error("Can't use atoi on non-string value")
+		end
+		try
+			parse(Int, value)
+		catch
+			error("Unable to parse string to integer")
+		end
 	end
 )
 
